@@ -11,8 +11,18 @@ const webhookURL = 'https://discord.com/api/webhooks/1229668788736098314/xn64JcP
 
 const sendNotification = async (req) => {
     const userAgent = req.headers['user-agent'] || 'Unknown';
-    const browserInfo = userAgent;
     const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    const botUserAgents = [
+        'bot', 'crawler', 'spider', 'crawling', 'curl', 'wget', 'python-requests',
+        'uptimerobot', 'pingdom', 'statuscake', 'newrelic', 'healthchecks', 'Better Uptime Bot'
+    ];
+
+    const isBot = botUserAgents.some(botAgent => userAgent.toLowerCase().includes(botAgent.toLowerCase()));
+
+    if (isBot) {
+        return;
+    }
 
     const embed = {
         title: "New API Request",
@@ -21,7 +31,7 @@ const sendNotification = async (req) => {
         fields: [
             {
                 name: "Browser Information",
-                value: browserInfo,
+                value: userAgent,
                 inline: false
             },
             {
@@ -46,7 +56,7 @@ const sendNotification = async (req) => {
         const response = await axios.post(webhookURL, message);
         console.log('Webhook response:', response.data);
     } catch (error) {
-        console.error('Failed to send webhook notification', error.message);
+        console.error('Failed to send webhook notification:', error.message);
     }
 };
 
