@@ -4,6 +4,8 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { check, validationResult } = require('express-validator');
 const axios = require('axios');
+const favicon = require('serve-favicon');
+const path = require('path');
 
 const app = express();
 const port = 8080;
@@ -118,6 +120,10 @@ const knockKnockJokes = [
 
 app.use(helmet());
 app.use(cors());
+
+app.use(favicon(path.join(__dirname, 'public.', 'favicon.ico')));
+
+app.use(express.static(path.join(__dirname, 'public.')));
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
