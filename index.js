@@ -67,7 +67,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const animeQuotes = [
+let animeQuotes = [
     { quote: "The only ones who should kill are those prepared to be killed.", character: "Lelouch Lamperouge", anime: "Code Geass" },
     { quote: "I don't want to conquer anything. I just think the guy with the most freedom in this whole ocean... is the Pirate King!", character: "Monkey D. Luffy", anime: "One Piece" },
     { quote: "Whatever you lose, you'll find it again. But what you throw away you'll never get back.", character: "Kenshin Himura", anime: "Rurouni Kenshin" },
@@ -98,7 +98,7 @@ const animeQuotes = [
     { quote: "Forgetting is like a wound. The wound may heal, but it has already left a scar.", character: "Monkey D. Luffy", anime: "One Piece" }
 ];
 
-const knockKnockJokes = [
+let knockKnockJokes = [
     { setup: "Knock knock.", punchline: "Who's there?", response: "Boo", reply: "Boo who?", final: "Don't cry, it's just a joke!" },
     { setup: "Knock knock.", punchline: "Who's there?", response: "Lettuce", reply: "Lettuce who?", final: "Lettuce in, it's cold out here!" },
     { setup: "Knock knock.", punchline: "Who's there?", response: "Cow says", reply: "Cow says who?", final: "No, a cow says moooo!" },
@@ -120,9 +120,9 @@ const knockKnockJokes = [
 
 app.use(helmet());
 app.use(cors());
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(favicon(path.join(__dirname, 'public.', 'favicon.ico')));
-
 app.use(express.static(path.join(__dirname, 'public.')));
 
 const limiter = rateLimit({
@@ -242,6 +242,173 @@ app.get('/', (req, res) => {
         </html>
     `;
     res.send(message);
+});
+
+app.get('/add', (req, res) => {
+    const form = `
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Anime Quotes or Knock-Knock Jokes</title>
+    <style>
+        body {
+            font-family: Courier New, Monaco, monospace;
+            margin: 20px;
+            padding: 20px;
+            background-color: #333;
+        }
+        h1 {
+            color: #fff;
+        }
+        h2 {
+          color: #fff;
+        }
+        form {
+            margin-bottom: 40px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #e91e63;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .response-message {
+            margin-top: 20px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Anime Quotes or Knock-Knock Jokes</h1>
+
+    <section id="anime-quote-section">
+        <form id="anime-quote-form">
+            <h2>Add Anime Quote</h2>
+            <div class="form-group">
+                <label for="anime-quote">Quote</label>
+                <textarea id="anime-quote" name="quote" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="anime-character">Character</label>
+                <input type="text" id="anime-character" name="character" required>
+            </div>
+            <div class="form-group">
+                <label for="anime-title">Anime</label>
+                <input type="text" id="anime-title" name="anime" required>
+            </div>
+            <button type="submit">Add Anime Quote</button>
+            <div class="response-message" id="anime-response"></div>
+        </form>
+    </section>
+
+    <section id="knock-knock-joke-section">
+        <form id="knock-knock-joke-form">
+            <h2>Add Knock-Knock Joke</h2>
+            <div class="form-group">
+                <label for="joke-setup">Setup</label>
+                <input type="text" id="joke-setup" name="setup" required>
+            </div>
+            <div class="form-group">
+                <label for="joke-punchline">Punchline</label>
+                <input type="text" id="joke-punchline" name="punchline" required>
+            </div>
+            <div class="form-group">
+                <label for="joke-response">Response</label>
+                <input type="text" id="joke-response" name="response" required>
+            </div>
+            <div class="form-group">
+                <label for="joke-reply">Reply</label>
+                <input type="text" id="joke-reply" name="reply" required>
+            </div>
+            <div class="form-group">
+                <label for="joke-final">Final</label>
+                <input type="text" id="joke-final" name="final" required>
+            </div>
+            <button type="submit">Add Knock-Knock Joke</button>
+            <div class="response-message" id="joke-response-message"></div>
+        </form>
+    </section>
+
+    <script>
+        document.getElementById('anime-quote-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const quote = document.getElementById('anime-quote').value;
+            const character = document.getElementById('anime-character').value;
+            const anime = document.getElementById('anime-title').value;
+            const responseMessage = document.getElementById('anime-response');
+
+            try {
+                const response = await fetch('/add/anime/quote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ quote, character, anime })
+                });
+                const result = await response.text();
+                responseMessage.textContent = result;
+            } catch (error) {
+                responseMessage.textContent = 'An error occurred while adding the anime quote.';
+            }
+        });
+
+        document.getElementById('knock-knock-joke-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const setup = document.getElementById('joke-setup').value;
+            const punchline = document.getElementById('joke-punchline').value;
+            const response = document.getElementById('joke-response').value;
+            const reply = document.getElementById('joke-reply').value;
+            const final = document.getElementById('joke-final').value;
+            const responseMessage = document.getElementById('joke-response-message');
+
+            try {
+                const response = await fetch('/add/knock/knock/joke', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ setup, punchline, response, reply, final })
+                });
+                const result = await response.text();
+                responseMessage.textContent = result;
+            } catch (error) {
+                responseMessage.textContent = 'An error occurred while adding the knock-knock joke.';
+            }
+        });
+    </script>
+</body>
+</html>
+`;
+    res.send(form);
+});
+
+app.post('/add/anime/quote', (req, res) => {
+    const { quote, character, anime } = req.body;
+    animeQuotes.push({ quote, character, anime });
+    res.redirect('/add');
+});
+
+app.post('/add/knock/knock/joke', (req, res) => {
+    const { setup, punchline, response, reply, final } = req.body;
+    knockKnockJokes.push({ setup, punchline, response, reply, final });
+    res.redirect('/add');
 });
 
 app.listen(port, () => {
