@@ -246,7 +246,7 @@ app.get('/', (req, res) => {
 
 app.post('/add/anime/quote', (req, res) => {
     const { quote, character, anime } = req.body;
-    if (!quote || !character || !anime) {
+    if (!quote | !character | !anime) {
         return res.status(400).send('Missing quote, character, or anime.');
     }
     animeQuotes.push({ quote, character, anime });
