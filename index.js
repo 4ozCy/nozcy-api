@@ -9,7 +9,6 @@ const path = require('path');
 
 const app = express();
 const port = 8080;
-const webhookURL = 'https://discord.com/api/webhooks/1229668788736098314/xn64JcPTZ82GTFwhCY3JbrBHzWv64s5hknMVzkpx2M86Z4-vkK4K4Q47dpNk1xFcIDgA';
 
 const sendNotification = async (req) => {
     const userAgent = req.headers['user-agent'] || 'Unknown';
@@ -26,48 +25,7 @@ const sendNotification = async (req) => {
         return;
     }
 
-    const embed = {
-        title: "New API Request",
-        description: "Details of the request:",
-        color: 16711680,
-        fields: [
-            {
-                name: "Browser Information",
-                value: userAgent,
-                inline: false
-            },
-            {
-                name: "IP Address",
-                value: ipAddress,
-                inline: false
-            },
-            {
-                name: "Endpoint",
-                value: req.originalUrl,
-                inline: false
-            }
-        ],
-        timestamp: new Date()
-    };
-
-    const message = {
-        embeds: [embed]
-    };
-
-    try {
-        const response = await axios.post(webhookURL, message);
-        console.log('Webhook response:', response.data);
-    } catch (error) {
-        console.error('Failed to send webhook notification:', error.message);
-    }
-};
-
-app.use((req, res, next) => {
-    sendNotification(req);
-    next();
-});
-
-let animeQuotes = [
+const animeQuotes = [
     { quote: "The only ones who should kill are those prepared to be killed.", character: "Lelouch Lamperouge", anime: "Code Geass" },
     { quote: "I don't want to conquer anything. I just think the guy with the most freedom in this whole ocean... is the Pirate King!", character: "Monkey D. Luffy", anime: "One Piece" },
     { quote: "Whatever you lose, you'll find it again. But what you throw away you'll never get back.", character: "Kenshin Himura", anime: "Rurouni Kenshin" },
@@ -98,7 +56,7 @@ let animeQuotes = [
     { quote: "Forgetting is like a wound. The wound may heal, but it has already left a scar.", character: "Monkey D. Luffy", anime: "One Piece" }
 ];
 
-let knockKnockJokes = [
+const knockKnockJokes = [
     { setup: "Knock knock.", punchline: "Who's there?", response: "Boo", reply: "Boo who?", final: "Don't cry, it's just a joke!" },
     { setup: "Knock knock.", punchline: "Who's there?", response: "Lettuce", reply: "Lettuce who?", final: "Lettuce in, it's cold out here!" },
     { setup: "Knock knock.", punchline: "Who's there?", response: "Cow says", reply: "Cow says who?", final: "No, a cow says moooo!" },
@@ -138,7 +96,7 @@ app.get('/anime/quote', (req, res) => {
     res.json(randomQuote);
 });
 
-app.get('/knock/knock/joke', (req, res) => {
+app.get('/kkj', (req, res) => {
     const randomJoke = knockKnockJokes[Math.floor(Math.random() * knockKnockJokes.length)];
     res.json(randomJoke);
 });
@@ -220,8 +178,8 @@ app.get('/', (req, res) => {
                         </div>
                     </li>
                     <li>
-                        <strong>/knock/knock/joke</strong>: Returns a random knock-knock joke.
-                        <p>Example Usage: GET /knock/knock/joke</p>
+                        <strong>/kkj</strong>: Returns a random knock-knock joke.
+                        <p>Example Usage: GET /kkj</p>
                         <div class="response-box">
                             <p class="response-header">Response:</p>
                             <div class="response-content">
@@ -242,24 +200,6 @@ app.get('/', (req, res) => {
         </html>
     `;
     res.send(message);
-});
-
-app.post('/add/anime/quote', (req, res) => {
-    const { quote, character, anime } = req.body;
-    if (!quote | !character | !anime) {
-        return res.status(400).send('Missing quote, character, or anime.');
-    }
-    animeQuotes.push({ quote, character, anime });
-    res.status(200).send('Anime quote added successfully.');
-});
-
-app.post('/add/knock/knock/joke', (req, res) => {
-    const { setup, punchline, response, reply, final } = req.body;
-    if (!setup || !punchline || !response || !reply || !final) {
-        return res.status(400).send('Missing setup, punchline, response, reply, or final.');
-    }
-    knockKnockJokes.push({ setup, punchline, response, reply, final });
-    res.status(200).send('Knock-knock joke added successfully.');
 });
 
 app.listen(port, () => {
