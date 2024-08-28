@@ -10,10 +10,6 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
-const sendNotification = async (req) => {
-    const userAgent = req.headers['user-agent'] || 'Unknown';
-    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
     const botUserAgents = [
         'bot', 'crawler', 'spider', 'crawling', 'curl', 'wget', 'python-requests',
         'uptimerobot', 'pingdom', 'statuscake', 'newrelic', 'healthchecks', 'Better Uptime Bot'
